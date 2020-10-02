@@ -16,12 +16,18 @@ void output();
 double calcAreaEV(Vec2 &topL, Vec2 &bottomR);
 void enumeratePath(vector<pair<int,Path>> &paths, const int maxDepth, const int maxRadix, const int depthAtEnumeration, const int maxCntOfMoveToZero);
 
+
 int h, w, agentNum, turns, turn;
 int walls[MAX_SIDE][MAX_SIDE], areas[MAX_SIDE][MAX_SIDE], points[MAX_SIDE][MAX_SIDE];
 Team teams[TEAM_NUM];
 
 int matchID;
 string dataPath;
+
+const int MIN_UNTAKEN_WALL_POINT = -16;
+const double MAGNIFICATION_OF_REMOVE = 1;
+
+random_device rd;
 
 int main(int argc, char *argv[]) {
     if (argc < 2) return 0;
@@ -79,29 +85,80 @@ int main(int argc, char *argv[]) {
             }
         }
     } else {
+        rep(i,agentNum) if (teams[0].agents[i].coord.x < 0 && teams[0].agents[i].coord.y < 0) teams[0].agents[i].action = Action(SET, Vec2(rd()%w, rd()%h));
         const int maxDepth = 6;
         const int maxRadix = 5;
-        const int depthAtEnumeration = 0;
-        const int maxCntOfMoveToZero = 2;
+        const int depthAtEnumeration = 2;
+        const int maxCntOfMoveToZero = 1;
+
         vector<pair<int,Path>> v;
-        clock_t start = clock();
+
         cout << "start!" << endl;
+
+        clock_t start = clock();
         enumeratePath(v, maxDepth, maxRadix, depthAtEnumeration, maxCntOfMoveToZero);
         cout << (double)(clock()-start) / CLOCKS_PER_SEC << "[s]" << endl;
-        cout << v.size() << endl;
-        rep(i,v.size()) {
-            if (i == 0) {
-                vector<Action> path = v[i].second.path;
-                for(auto action : path) {
-                    cout << action.type << " (" << action.targetCoord.x << ", " << action.targetCoord.y << ") ->" << endl;
+
+        priority_queue<pair<int,Path>, vector<pair<int,Path>>, function<bool(pair<int,Path>,pair<int,Path>)>> pq(
+                [](const pair<int,Path> &a, const pair<int,Path> &b){return a.second.pointSum<b.second.pointSum;}
+        );
+        int tmpWalls[MAX_SIDE][MAX_SIDE] = {};
+        int cnt[MAX_AGENT] = {}, setCount=0;
+        bool set__idx[MAX_AGENT] = {}, set__coord[MAX_SIDE][MAX_SIDE] = {};
+
+        rep(i,h) rep(j,w) tmpWalls[i][j] = walls[i][j];
+        for(auto a : v) {
+            pq.push(a);
+            cnt[a.first]++;
+        }
+
+        while(!pq.empty() && setCount != agentNum) {
+            vector<pair<int, Vec2>> originalWallValue;
+            const int idx = pq.top().first;
+            const int point = pq.top().second.pointSum;
+            const vector<Action> actions = pq.top().second.path;
+            pq.pop();
+            if (set__idx[idx]) continue;
+
+            int actualPoint=0;
+            for(auto action : actions) {
+                const Vec2 targetCoord = action.targetCoord;
+                const int y = targetCoord.y, x = targetCoord.x;
+                const string type = action.type;
+
+                originalWallValue.emplace_back(tmpWalls[y][x], targetCoord);
+
+                if (type == MOVE) {
+                    if (tmpWalls[y][x] == 0) {
+                        if (areas[y][x] == teams[0].teamID) actualPoint += points[y][x] - abs(points[y][x]);
+                        else if (areas[y][x] == teams[1].teamID) actualPoint += points[y][x] + abs(points[y][x]);
+                        else actualPoint += max(MIN_UNTAKEN_WALL_POINT, points[y][x]);
+                    }
+                    tmpWalls[y][x] = teams[0].teamID;
+                }
+                if (type == REMOVE) {
+                    if (tmpWalls[y][x] == teams[0].teamID) actualPoint += -points[y][x]*MAGNIFICATION_OF_REMOVE;
+                    if (tmpWalls[y][x] == teams[1].teamID) actualPoint += points[y][x]*MAGNIFICATION_OF_REMOVE;
+                    tmpWalls[y][x] = 0;
                 }
             }
-            int point = v[i].second.pointSum;
-            Action action = v[i].second.path.front();
-            teams[0].agents[v[i].first].action = v[i].second.path.front();
-            cout << point << " " << action.type
-                 << " (" << teams[0].agents[v[i].first].coord.x << ", " << teams[0].agents[v[i].first].coord.y << ") -> ("
-                 << action.targetCoord.x << ", " << action.targetCoord.y << ")" << endl;
+
+
+            const int ty = actions.front().targetCoord.y, tx = actions.front().targetCoord.x;
+            if ((actualPoint == point || cnt[idx] == 1) && !set__coord[ty][tx]) {
+                teams[0].agents[idx].action = actions.front();
+                setCount++;
+                set__idx[idx] = true;
+                set__coord[ty][tx] = true;
+            } else {
+                if (actualPoint != point) {
+                    Path tmpPath;
+                    tmpPath.pointSum = actualPoint;
+                    tmpPath.path = actions;
+                    pq.push({idx, tmpPath});
+                } else cnt[idx]--;
+                for(auto [value, coord] : originalWallValue) tmpWalls[coord.y][coord.x] = value;
+            }
         }
     }
     output();
