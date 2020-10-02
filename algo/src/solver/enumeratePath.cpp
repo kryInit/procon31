@@ -21,9 +21,6 @@ extern int h, w, agentNum, turns, turn;
 extern int walls[MAX_SIDE][MAX_SIDE], areas[MAX_SIDE][MAX_SIDE], points[MAX_SIDE][MAX_SIDE];
 extern Team teams[TEAM_NUM];
 
-extern const int MIN_UNTAKEN_WALL_POINT = 1;
-extern const double MAGNIFICATION_OF_REMOVE = 1.3;
-
 struct forRecursionData {
     int depth, originalWall, level, parentIdx;
     Vec2 coord;

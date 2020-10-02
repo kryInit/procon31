@@ -24,9 +24,6 @@ Team teams[TEAM_NUM];
 int matchID;
 string dataPath;
 
-const int MIN_UNTAKEN_WALL_POINT = -16;
-const double MAGNIFICATION_OF_REMOVE = 1;
-
 random_device rd;
 
 int main(int argc, char *argv[]) {
@@ -86,8 +83,8 @@ int main(int argc, char *argv[]) {
         }
     } else {
         rep(i,agentNum) if (teams[0].agents[i].coord.x < 0 && teams[0].agents[i].coord.y < 0) teams[0].agents[i].action = Action(SET, Vec2(rd()%w, rd()%h));
-        const int maxDepth = 6;
-        const int maxRadix = 5;
+        const int maxDepth = 7;
+        const int maxRadix = 4;
         const int depthAtEnumeration = 2;
         const int maxCntOfMoveToZero = 1;
 
