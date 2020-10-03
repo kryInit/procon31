@@ -2,5 +2,5 @@
 using namespace std;
 
 int main() {
-    cout << "procon31.app" << endl;
+    cout << "will start a match now!" << endl;
 }

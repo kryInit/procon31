@@ -10,4 +10,4 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 
 add_subdirectory(solver)
-add_subdirectory(procon31App)
+add_subdirectory(playMatch)
