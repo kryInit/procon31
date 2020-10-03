@@ -90,11 +90,16 @@ int main(int argc, char *argv[]) {
 
         vector<pair<int,Path>> v;
 
+#ifdef DEBUG
         cout << "start!" << endl;
+#endif
 
         clock_t start = clock();
         enumeratePath(v, maxDepth, maxRadix, depthAtEnumeration, maxCntOfMoveToZero);
+
+#ifdef DEBUG
         cout << (double)(clock()-start) / CLOCKS_PER_SEC << "[s]" << endl;
+#endif
 
         priority_queue<pair<int,Path>, vector<pair<int,Path>>, function<bool(pair<int,Path>,pair<int,Path>)>> pq(
                 [](const pair<int,Path> &a, const pair<int,Path> &b){return a.second.pointSum<b.second.pointSum;}
