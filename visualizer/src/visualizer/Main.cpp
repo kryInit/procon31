@@ -70,6 +70,7 @@ void Main()
         // registered matchIDが一つ以上ある状態でtabを押すことでvisualizeするmatchを切り替えることができる
         if ((KeyTab.down() || (CAN_USE_PS4_CONTROLLER && Gamepad(0).buttons[9].down())) && registeredMatchID.size()) {
             nowMatchIdx = (registeringMatchID ? 0 : (nowMatchIdx+1)%registeredMatchID.size());
+            if (struct stat st; stat(("../data/" + to_string(registeredMatchID[nowMatchIdx]) + "/fieldInfo").c_str(), &st)) continue;
             game = Game(registeredMatchID[nowMatchIdx]);
             registeringMatchID = false;
         }
