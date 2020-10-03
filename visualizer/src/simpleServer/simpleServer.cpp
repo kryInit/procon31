@@ -223,7 +223,6 @@ void transition() {
                     if (x < 0 && y < 0) {
                         if (walls[toy][tox] == 0 || walls[toy][tox] == team.teamID) {
                             teams[i].agents[j].coord = agent.action.targetCoord;
-                            walls[toy][tox] = team.teamID;
                         }
                     }
                 }
