@@ -20,7 +20,7 @@ con = requests.get(URL, headers=header)
 sc = con.status_code
 
 cnt = 0
-while (sc == 400 or sc == 425 or sc == 429) and cnt < 60:
+while (sc == 400 or sc == 429) and cnt < 60:
     usleep(300);
     con = requests.get(URL, headers=header)
     sc = con.status_code

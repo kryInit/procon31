@@ -55,7 +55,7 @@ response = requests.post(URL, data=json.dumps(data), headers=headers)
 sc = response.status_code
 
 cnt=0
-while (sc == 400 or sc == 425 or sc == 429) and cnt < 60:
+while (sc == 400 or sc == 429) and cnt < 60:
     response = requests.post(URL, data=data, headers=headers)
     sc = response.status_code
     cnt += 1

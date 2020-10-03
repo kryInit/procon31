@@ -19,6 +19,9 @@ header = {"x-api-token": token}
 con = requests.get(URL, headers=header)
 sc = con.status_code
 
+if sc == 425:
+    usleep((int(con.headers['retry-after'])-1)*1000)
+
 cnt = 0
 while (sc == 400 or sc == 425 or sc == 429) and cnt < 60:
     usleep(300);
