@@ -62,8 +62,10 @@ while (sc == 400 or sc == 429) and cnt < 60:
 
 if sc == 201 or sc == 202:
     print("[comms] Actionの送信が完了しました", file=sys.stderr)
-    os.remove(dataPath+"/action")
-    os.remove(dataPath+"/forcedAction")
+    with open(dataPath+"/action", mode='w') as f:
+        print(0, file=f)
+    with open(dataPath+"/forcedAction", mode='w') as f:
+        print(0, file=f)
 else:
     print("[comms] status code: {}, Actionの送信が行えませんでした".format(sc), file=sys.stderr)
 
