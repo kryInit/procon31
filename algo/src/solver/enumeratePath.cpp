@@ -21,6 +21,9 @@ extern int h, w, agentNum, turns, turn;
 extern int walls[MAX_SIDE][MAX_SIDE], areas[MAX_SIDE][MAX_SIDE], points[MAX_SIDE][MAX_SIDE];
 extern Team teams[TEAM_NUM];
 
+// levelは訪れた回数
+// 1度目は子のパスを求めるために子をemplace_backしたりするが
+// 2度目に訪れた時(戻ってきた時)は親に良いパスを渡すという別のことをしなければならないため
 struct forRecursionData {
     int depth, originalWall, level, parentIdx;
     Vec2 coord;
@@ -77,13 +80,14 @@ void enumeratePath(vector<pair<int,Path>> &paths, const int maxDepth, const int 
                         const int x = nowCoord.x+d[i], y = nowCoord.y+d[j];
                         if (!isSafeIdx(Vec2(x,y)) || (i == 1 && j == 1)) continue;
                         const Vec2 coord(x,y);
-                        if (areas[y][x] == teams[0].teamID) candidates.emplace_back(points[y][x]-abs(points[y][x]), Action(MOVE, coord));
-                        else if (areas[y][x] == teams[1].teamID) candidates.emplace_back(points[y][x]+abs(points[y][x]), Action(MOVE, coord));
-                        else if (walls[y][x] == 0) candidates.emplace_back(max(MIN_UNTAKEN_WALL_POINT,points[y][x]), Action(MOVE, coord));
-                        else if (walls[y][x] == teams[1].teamID) candidates.emplace_back(points[y][x]*MAGNIFICATION_OF_REMOVE, Action(REMOVE, coord));
+                        const int tmpPoint = points[y][x];
+                        if (areas[y][x] == teams[0].teamID) candidates.emplace_back(tmpPoint-abs(tmpPoint), Action(MOVE, coord));
+                        else if (areas[y][x] == teams[1].teamID) candidates.emplace_back(tmpPoint+abs(tmpPoint), Action(MOVE, coord));
+                        else if (walls[y][x] == 0) candidates.emplace_back(tmpPoint, Action(MOVE, coord));
+                        else if (walls[y][x] == teams[1].teamID) candidates.emplace_back(tmpPoint, Action(REMOVE, coord));
                         else if (walls[y][x] == teams[0].teamID) {
                             candidates.emplace_back(0, Action(MOVE, coord));
-                            candidates.emplace_back(-points[y][x]*MAGNIFICATION_OF_REMOVE, Action(REMOVE, coord));
+                            if (tmpPoint < 0) candidates.emplace_back(-tmpPoint, Action(REMOVE, coord));
                         }
                     }
                     // 行動で得られるスコアの降順にソート
@@ -124,7 +128,11 @@ void enumeratePath(vector<pair<int,Path>> &paths, const int maxDepth, const int 
                 }
                 // bestPath(葉ならnowPath)をparentのbestPathに突っ込んでいる
                 Path bestPath = (nowDepth == maxDepth ? nowPath : tmpfrd.bestPath);
-                if (0 <= tmpfrd.parentIdx) forRecursion[tmpfrd.parentIdx].bestPath = bestPath;
+                if (0 <= tmpfrd.parentIdx) {
+                    if (forRecursion[tmpfrd.parentIdx].bestPath < bestPath) {
+                        forRecursion[tmpfrd.parentIdx].bestPath = bestPath;
+                    }
+                }
 
                 forRecursion.pop_back();
 

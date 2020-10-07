@@ -13,8 +13,4 @@ const std::string MOVE = "move";
 const std::string REMOVE = "remove";
 const std::string SET = "set";
 
-
-const int MIN_UNTAKEN_WALL_POINT = -16;
-const double MAGNIFICATION_OF_REMOVE = 1;
-
 #endif

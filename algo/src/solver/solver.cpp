@@ -34,49 +34,30 @@ int main(int argc, char *argv[]) {
 
     input();
 
-    if (turn <= 1) {
+    if (turn <= 2) {
         Vec2 topL, bottomR;
         double ev = calcAreaEV(topL, bottomR);
-        cerr << ev << endl;
+#ifdef DEBUG
+        cout << ev << endl;
+#endif
         if (ev > 0) {
-            if (turn == 0) {
-                Vec2 tmp = topL;
-                rep(i,agentNum) {
-                    teams[0].agents[i].action = Action(SET, tmp);
-                    rep(_,2) {
-                        if (tmp.y == topL.y) {
-                            if (tmp.x == bottomR.x) tmp.y++;
-                            else tmp.x++;
-                        } else if (tmp.x == bottomR.x) {
-                            if (tmp.y == bottomR.y) tmp.x--;
-                            else tmp.y++;
-                        } else if (tmp.y == bottomR.y) {
-                            if (tmp.x == topL.x) tmp.y--;
-                            else tmp.x--;
-                        } else if (tmp.x == topL.x) {
-                            if (tmp.y == topL.y) tmp.x++;
-                            else tmp.y--;
-                        }
-                    }
-                }
-            } else {
-                Vec2 tmp = topL;
-                rep(i,agentNum) {
-                    rep(j,2) {
-                        if (j == 1) teams[0].agents[i].action = Action(MOVE, tmp);
-                        if (tmp.y == topL.y) {
-                            if (tmp.x == bottomR.x) tmp.y++;
-                            else tmp.x++;
-                        } else if (tmp.x == bottomR.x) {
-                            if (tmp.y == bottomR.y) tmp.x--;
-                            else tmp.y++;
-                        } else if (tmp.y == bottomR.y) {
-                            if (tmp.x == topL.x) tmp.y--;
-                            else tmp.x--;
-                        } else if (tmp.x == topL.x) {
-                            if (tmp.y == topL.y) tmp.x++;
-                            else tmp.y--;
-                        }
+            Vec2 tmp = topL;
+            rep(i,agentNum) {
+                if (turn != 1) teams[0].agents[i].action = Action((turn==0 ? SET : MOVE), tmp);
+                rep(j,2) {
+                    if (turn==1 && j==1) teams[0].agents[i].action = Action(MOVE, tmp);
+                    if (tmp.y == topL.y) {
+                        if (tmp.x == bottomR.x) tmp.y++;
+                        else tmp.x++;
+                    } else if (tmp.x == bottomR.x) {
+                        if (tmp.y == bottomR.y) tmp.x--;
+                        else tmp.y++;
+                    } else if (tmp.y == bottomR.y) {
+                        if (tmp.x == topL.x) tmp.y--;
+                        else tmp.x--;
+                    } else if (tmp.x == topL.x) {
+                        if (tmp.y == topL.y) tmp.x++;
+                        else tmp.y--;
                     }
                 }
             }
@@ -92,9 +73,9 @@ int main(int argc, char *argv[]) {
 
 #ifdef DEBUG
         cout << "start!" << endl;
+        clock_t start = clock();
 #endif
 
-        clock_t start = clock();
         enumeratePath(v, maxDepth, maxRadix, depthAtEnumeration, maxCntOfMoveToZero);
 
 #ifdef DEBUG
@@ -123,24 +104,27 @@ int main(int argc, char *argv[]) {
             if (set__idx[idx]) continue;
 
             int actualPoint=0;
-            for(auto action : actions) {
+//            for(auto action : actions) {
+            rep(i,min(3,(int)actions.size())) {
+                Action action = actions[i];
                 const Vec2 targetCoord = action.targetCoord;
                 const int y = targetCoord.y, x = targetCoord.x;
                 const string type = action.type;
+                const int tmpPoint = points[y][x];
 
                 originalWallValue.emplace_back(tmpWalls[y][x], targetCoord);
 
                 if (type == MOVE) {
                     if (tmpWalls[y][x] == 0) {
-                        if (areas[y][x] == teams[0].teamID) actualPoint += points[y][x] - abs(points[y][x]);
-                        else if (areas[y][x] == teams[1].teamID) actualPoint += points[y][x] + abs(points[y][x]);
-                        else actualPoint += max(MIN_UNTAKEN_WALL_POINT, points[y][x]);
+                        if (areas[y][x] == teams[0].teamID) actualPoint += tmpPoint - abs(tmpPoint);
+                        else if (areas[y][x] == teams[1].teamID) actualPoint += tmpPoint + abs(tmpPoint);
+                        else if (tmpWalls[y][x] == 0) actualPoint += tmpPoint;
                     }
                     tmpWalls[y][x] = teams[0].teamID;
                 }
                 if (type == REMOVE) {
-                    if (tmpWalls[y][x] == teams[0].teamID) actualPoint += -points[y][x]*MAGNIFICATION_OF_REMOVE;
-                    if (tmpWalls[y][x] == teams[1].teamID) actualPoint += points[y][x]*MAGNIFICATION_OF_REMOVE;
+                    if (tmpWalls[y][x] == teams[0].teamID) actualPoint -= tmpPoint;
+                    if (tmpWalls[y][x] == teams[1].teamID) actualPoint += tmpPoint;
                     tmpWalls[y][x] = 0;
                 }
             }
