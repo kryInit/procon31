@@ -81,13 +81,15 @@ void enumeratePath(vector<pair<int,Path>> &paths, const int maxDepth, const int 
                         if (!isSafeIdx(Vec2(x,y)) || (i == 1 && j == 1)) continue;
                         const Vec2 coord(x,y);
                         const int tmpPoint = points[y][x];
-                        if (areas[y][x] == teams[0].teamID) candidates.emplace_back(tmpPoint-abs(tmpPoint), Action(MOVE, coord));
-                        else if (areas[y][x] == teams[1].teamID) candidates.emplace_back(tmpPoint+abs(tmpPoint), Action(MOVE, coord));
-                        else if (walls[y][x] == 0) candidates.emplace_back(tmpPoint, Action(MOVE, coord));
-                        else if (walls[y][x] == teams[1].teamID) candidates.emplace_back(tmpPoint, Action(REMOVE, coord));
+                        if (walls[y][x] == teams[1].teamID) candidates.emplace_back(tmpPoint, Action(REMOVE, coord));
                         else if (walls[y][x] == teams[0].teamID) {
                             candidates.emplace_back(0, Action(MOVE, coord));
                             if (tmpPoint < 0) candidates.emplace_back(-tmpPoint, Action(REMOVE, coord));
+                        }
+                        else if (walls[y][x] == 0) {
+                            if (areas[y][x] == teams[0].teamID) candidates.emplace_back(tmpPoint-abs(tmpPoint), Action(MOVE, coord));
+                            else if (areas[y][x] == teams[1].teamID) candidates.emplace_back(tmpPoint+abs(tmpPoint), Action(MOVE, coord));
+                            else candidates.emplace_back(tmpPoint, Action(MOVE, coord));
                         }
                     }
                     // 行動で得られるスコアの降順にソート
