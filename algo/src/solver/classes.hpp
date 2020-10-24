@@ -9,6 +9,12 @@ struct Vec2 {
     bool operator<( const Vec2& another ) const {
         return x == another.x ? y < another.y : x < another.x;
     }
+    bool operator==( const Vec2& another ) const {
+        return x == another.x && y == another.y;
+    }
+    bool operator!=( const Vec2& another ) const {
+        return x != another.x || y != another.y;
+    }
 
     Vec2() { x = y = 0; }
     Vec2(int _x, int _y) { x = _x; y = _y; }
