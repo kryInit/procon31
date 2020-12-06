@@ -5,7 +5,7 @@ using namespace std;
 
 #define rep(i,n) for(int (i)=0; (i)<(n); ++(i))
 
-extern int h, w, agentNum, turns, turn;
+extern int h, w, agentNum, turns, turn, operationMillis;
 extern int walls[MAX_SIDE][MAX_SIDE], areas[MAX_SIDE][MAX_SIDE], points[MAX_SIDE][MAX_SIDE];
 extern Team teams[TEAM_NUM];
 
@@ -16,7 +16,7 @@ void input() {
     {
         int _;
         ifstream ifs(dataPath + "gameInfo");
-        ifs >> _ >> _ >> turns;
+        ifs >> _ >> _ >> turns >> operationMillis;
     }
     {
         int _;

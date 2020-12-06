@@ -17,7 +17,7 @@ double calcAreaEV(Vec2 &topL, Vec2 &bottomR);
 void enumeratePath(vector<pair<int,Path>> &paths, const int maxDepth, const int maxRadix, const int depthAtEnumeration, const int maxCntOfMoveToZero);
 
 
-int h, w, agentNum, turns, turn;
+int h, w, agentNum, turns, turn, operationMillis;
 int walls[MAX_SIDE][MAX_SIDE], areas[MAX_SIDE][MAX_SIDE], points[MAX_SIDE][MAX_SIDE];
 Team teams[TEAM_NUM];
 
